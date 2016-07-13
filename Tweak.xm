@@ -6,29 +6,51 @@
 //  Copyright © 2016 Tanner Bennett. All rights reserved.
 //
 
-#import "Interfaces.h"
+#import "FLEX/FLEXManager.h"
+#include "Activator/libactivator.h"
 
+@interface FLEXingActivatorListenerInstance : NSObject <LAListener>
+@end
 
-%hook UIWindow
+@implementation FLEXingActivatorListenerInstance
 
-- (id)initWithFrame:(CGRect)frame {
-    self = %orig(frame);
-    
-    id flex = [FLEXManager sharedManager];
-    SEL toggle = @selector(toggleExplorer);
-    SEL show = @selector(showExplorer);
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:flex action:toggle];
-    tap.numberOfTapsRequired = 2;
-    tap.numberOfTouchesRequired = 2;
-    
-    UILongPressGestureRecognizer *tap2 = [[UILongPressGestureRecognizer alloc] initWithTarget:flex action:show];
-    tap2.minimumPressDuration = .5;
-    tap2.numberOfTouchesRequired = 3;
-    
-    [self addGestureRecognizer:tap];
-    [self addGestureRecognizer:tap2];
-    
-    return self;
+- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName{
+
+    if( [listenerName isEqualToString:@"com.pantsthief.flexing.show"] ){
+        [[FLEXManager sharedManager] showExplorer];
+    }
+
+    else if( [listenerName isEqualToString:@"com.pantsthief.flexing.toggle"] ){
+        [[FLEXManager sharedManager] toggleExplorer];
+    } 
+
+    else { 
+        // ..
+    }
 }
 
-%end
+@end
+
+
+static FLEXingActivatorListenerInstance* FLEXALI;
+
+//
+// Creates the actual Activator listener object
+//
+static void createListener()
+{
+    NSLog(@"flexing - cl");
+    FLEXALI = [[FLEXingActivatorListenerInstance alloc] init];
+    [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.show"];
+    [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.toggle"];
+}
+
+
+//
+// Constructor
+//
+%ctor
+{
+    NSLog(@"flexing - ctor");
+    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), NULL, (CFNotificationCallback)createListener, (CFStringRef)UIApplicationDidFinishLaunchingNotification, NULL, CFNotificationSuspensionBehaviorCoalesce); 
+}
