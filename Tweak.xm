@@ -7,7 +7,20 @@
 //
 
 #import "FLEX/FLEXManager.h"
-#include "Activator/libactivator.h"
+#import "Activator/libactivator.h"
+#import <objcipc/objcipc.h>
+
+@interface UIApplication (Private)
+-(id)displayIdentifier;
+@end
+
+@interface SBApplication
+- (NSString *)bundleIdentifier;
+@end
+
+@interface SpringBoard : UIApplication
+- (SBApplication *)_accessibilityFrontMostApplication;
+@end
 
 @interface FLEXingActivatorListenerInstance : NSObject <LAListener>
 @end
@@ -16,41 +29,69 @@
 
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName{
 
-    if( [listenerName isEqualToString:@"com.pantsthief.flexing.show"] ){
-        [[FLEXManager sharedManager] showExplorer];
+    NSString *frontmostAppID = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
+
+    if([listenerName isEqualToString:@"com.pantsthief.flexing.show"] ){
+        if(frontmostAppID) {
+
+            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:@"com.pantsthief.flexing.show" dictionary:nil replyHandler:^(NSDictionary *response) {
+                [event setHandled:YES];
+            }];
+
+        } else {
+            [[FLEXManager sharedManager] showExplorer];
+            [event setHandled:YES];
+        }
+        
     }
 
-    else if( [listenerName isEqualToString:@"com.pantsthief.flexing.toggle"] ){
-        [[FLEXManager sharedManager] toggleExplorer];
+    else if([listenerName isEqualToString:@"com.pantsthief.flexing.toggle"] ){
+        if(frontmostAppID) {
+
+            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:@"com.pantsthief.flexing.toggle" dictionary:nil replyHandler:^(NSDictionary *response) {
+                [event setHandled:YES];
+            }];
+
+        } else {
+            [[FLEXManager sharedManager] toggleExplorer];
+            [event setHandled:YES];
+        }
     } 
 
     else { 
-        // ..
+        [event setHandled:NO];
     }
 }
 
 @end
 
 
-static FLEXingActivatorListenerInstance* FLEXALI;
+%hook UIApplication
 
-//
-// Creates the actual Activator listener object
-//
-static void createListener()
-{
-    NSLog(@"flexing - cl");
-    FLEXALI = [[FLEXingActivatorListenerInstance alloc] init];
-    [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.show"];
-    [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.toggle"];
+-(id)init {
+
+    NSString *displayID = [self displayIdentifier];
+
+    //register activator handlers in springboard
+    if ([displayID isEqualToString:@"com.apple.springboard"]) {
+        FLEXingActivatorListenerInstance *FLEXALI = [[FLEXingActivatorListenerInstance alloc] init];
+        [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.show"];
+        [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.toggle"];
+    } else {
+
+        //register message handlers
+        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:@"com.pantsthief.flexing.show" handler:^NSDictionary *(NSDictionary *message) {
+            [[FLEXManager sharedManager] showExplorer];
+            return nil;
+        }];
+
+        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:@"com.pantsthief.flexing.toggle" handler:^NSDictionary *(NSDictionary *message) {
+            [[FLEXManager sharedManager] toggleExplorer];
+            return nil;
+        }];
+    }
+
+    return %orig;
 }
 
-
-//
-// Constructor
-//
-%ctor
-{
-    NSLog(@"flexing - ctor");
-    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), NULL, (CFNotificationCallback)createListener, (CFStringRef)UIApplicationDidFinishLaunchingNotification, NULL, CFNotificationSuspensionBehaviorCoalesce); 
-}
+%end

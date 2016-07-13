@@ -1,14 +1,12 @@
-export ARCHS = arm64
-export TARGET = iphone:9.0:9.0
-include theos/makefiles/common.mk
+export TARGET = iphone:latest:latest
+include $(THEOS)/makefiles/common.mk
 
 SOURCES := $(wildcard FLEX/*.m)
 
 TWEAK_NAME = FLEXing
 FLEXing_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore
 FLEXing_FILES = Tweak.xm $(SOURCES)
-FLEXing_LDFLAGS += -Wl,-segalign,4000
-FLEXing_LIBRARIES = sqlite3 z activator
+FLEXing_LIBRARIES = sqlite3 z activator objcipc
 FLEXing_CFLAGS += -fobjc-arc -w
 
 include $(THEOS_MAKE_PATH)/tweak.mk
