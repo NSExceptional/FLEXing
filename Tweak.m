@@ -16,7 +16,7 @@
 @implementation FLEXingActivatorListenerInstance
 
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName {
-    NSString *frontmostAppID = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
+    NSString *frontmostAppID = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
     
     if ([listenerName isEqualToString:kFLEXingShow] && !frontmostAppID) {
         [[FLEXManager sharedManager] showExplorer];
