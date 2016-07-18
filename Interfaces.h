@@ -9,6 +9,8 @@
 #pragma mark Imports
 
 #import "FLEX/FLEXManager.h"
+#import <libactivator/libactivator.h>
+#import <objcipc/objcipc.h>
 
 
 #pragma mark Macros
@@ -30,4 +32,18 @@ otherButtonTitles:nil] show]
 
 #pragma mark Interfaces
 
+static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
+static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
 
+
+@interface UIApplication (Private)
+- (id)displayIdentifier;
+@end
+
+@interface SBApplication
+- (NSString *)bundleIdentifier;
+@end
+
+@interface SpringBoard : UIApplication
+- (SBApplication *)_accessibilityFrontMostApplication;
+@end

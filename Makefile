@@ -1,4 +1,5 @@
-export TARGET = iphone:latest:latest
+export ARCHS = arm64
+export TARGET = iphone:9.0:9.0
 include $(THEOS)/makefiles/common.mk
 
 SOURCES := $(wildcard FLEX/*.m)

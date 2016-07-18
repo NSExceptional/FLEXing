@@ -6,29 +6,64 @@
 //  Copyright © 2016 Tanner Bennett. All rights reserved.
 //
 
+
 #import "Interfaces.h"
 
 
-%hook UIWindow
+@interface FLEXingActivatorListenerInstance : NSObject <LAListener>
+@end
 
-- (id)initWithFrame:(CGRect)frame {
-    self = %orig(frame);
+@implementation FLEXingActivatorListenerInstance
+
+- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName {
+    NSString *frontmostAppID = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
     
-    id flex = [FLEXManager sharedManager];
-    SEL toggle = @selector(toggleExplorer);
-    SEL show = @selector(showExplorer);
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:flex action:toggle];
-    tap.numberOfTapsRequired = 2;
-    tap.numberOfTouchesRequired = 2;
+    if ([listenerName isEqualToString:kFLEXingShow] && !frontmostAppID) {
+        [[FLEXManager sharedManager] showExplorer];
+    } else if ([listenerName isEqualToString:kFLEXingToggle] && !frontmostAppID) {
+        [[FLEXManager sharedManager] toggleExplorer];
+    } else {
+        event.handled = NO;
+        return;
+    }
     
-    UILongPressGestureRecognizer *tap2 = [[UILongPressGestureRecognizer alloc] initWithTarget:flex action:show];
-    tap2.minimumPressDuration = .5;
-    tap2.numberOfTouchesRequired = 3;
+    if (frontmostAppID) {
+        [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:listenerName dictionary:nil replyHandler:^(NSDictionary *response) {
+            event.handled = YES;
+        }];
+    } else {
+        event.handled = YES;
+    }
+}
+
+@end
+
+
+%hook UIApplication
+
+- (id)init {
+    NSString *displayID = [self displayIdentifier];
     
-    [self addGestureRecognizer:tap];
-    [self addGestureRecognizer:tap2];
+    // Register activator handlers in springboard
+    if ([displayID isEqualToString:@"com.apple.springboard"]) {
+        FLEXingActivatorListenerInstance *FLEXALI = [FLEXingActivatorListenerInstance new];
+        [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingShow];
+        [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingToggle];
+    } else {
+        
+        // Register message handlers
+        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingShow handler:^NSDictionary *(NSDictionary *message) {
+            [[FLEXManager sharedManager] showExplorer];
+            return nil;
+        }];
+        
+        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingToggle handler:^NSDictionary *(NSDictionary *message) {
+            [[FLEXManager sharedManager] toggleExplorer];
+            return nil;
+        }];
+    }
     
-    return self;
+    return %orig;
 }
 
 %end

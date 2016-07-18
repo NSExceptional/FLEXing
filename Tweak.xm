@@ -6,60 +6,33 @@
 //  Copyright © 2016 Tanner Bennett. All rights reserved.
 //
 
-#import "FLEX/FLEXManager.h"
-#import "Activator/libactivator.h"
-#import <objcipc/objcipc.h>
 
-@interface UIApplication (Private)
--(id)displayIdentifier;
-@end
+#import "Interfaces.h"
 
-@interface SBApplication
-- (NSString *)bundleIdentifier;
-@end
-
-@interface SpringBoard : UIApplication
-- (SBApplication *)_accessibilityFrontMostApplication;
-@end
 
 @interface FLEXingActivatorListenerInstance : NSObject <LAListener>
 @end
 
 @implementation FLEXingActivatorListenerInstance
 
-- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName{
-
+- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName {
     NSString *frontmostAppID = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
-
-    if([listenerName isEqualToString:@"com.pantsthief.flexing.show"] ){
-        if(frontmostAppID) {
-
-            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:@"com.pantsthief.flexing.show" dictionary:nil replyHandler:^(NSDictionary *response) {
-                [event setHandled:YES];
-            }];
-
-        } else {
-            [[FLEXManager sharedManager] showExplorer];
-            [event setHandled:YES];
-        }
-        
+    
+    if ([listenerName isEqualToString:kFLEXingShow] && !frontmostAppID) {
+        [[FLEXManager sharedManager] showExplorer];
+    } else if ([listenerName isEqualToString:kFLEXingToggle] && !frontmostAppID) {
+        [[FLEXManager sharedManager] toggleExplorer];
+    } else {
+        event.handled = NO;
+        return;
     }
-
-    else if([listenerName isEqualToString:@"com.pantsthief.flexing.toggle"] ){
-        if(frontmostAppID) {
-
-            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:@"com.pantsthief.flexing.toggle" dictionary:nil replyHandler:^(NSDictionary *response) {
-                [event setHandled:YES];
-            }];
-
-        } else {
-            [[FLEXManager sharedManager] toggleExplorer];
-            [event setHandled:YES];
-        }
-    } 
-
-    else { 
-        [event setHandled:NO];
+    
+    if (frontmostAppID) {
+        [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:listenerName dictionary:nil replyHandler:^(NSDictionary *response) {
+            event.handled = YES;
+        }];
+    } else {
+        event.handled = YES;
     }
 }
 
@@ -68,29 +41,28 @@
 
 %hook UIApplication
 
--(id)init {
-
+- (id)init {
     NSString *displayID = [self displayIdentifier];
-
-    //register activator handlers in springboard
+    
+    // Register activator handlers in springboard
     if ([displayID isEqualToString:@"com.apple.springboard"]) {
-        FLEXingActivatorListenerInstance *FLEXALI = [[FLEXingActivatorListenerInstance alloc] init];
-        [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.show"];
-        [[LAActivator sharedInstance] registerListener:FLEXALI forName:@"com.pantsthief.flexing.toggle"];
+        FLEXingActivatorListenerInstance *FLEXALI = [FLEXingActivatorListenerInstance new];
+        [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingShow];
+        [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingToggle];
     } else {
-
-        //register message handlers
-        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:@"com.pantsthief.flexing.show" handler:^NSDictionary *(NSDictionary *message) {
+        
+        // Register message handlers
+        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingShow handler:^NSDictionary *(NSDictionary *message) {
             [[FLEXManager sharedManager] showExplorer];
             return nil;
         }];
-
-        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:@"com.pantsthief.flexing.toggle" handler:^NSDictionary *(NSDictionary *message) {
+        
+        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingToggle handler:^NSDictionary *(NSDictionary *message) {
             [[FLEXManager sharedManager] toggleExplorer];
             return nil;
         }];
     }
-
+    
     return %orig;
 }
 
