@@ -1,4 +1,4 @@
-export ARCHS = arm64
+#export ARCHS = arm64
 export TARGET = iphone:9.0:9.0
 include $(THEOS)/makefiles/common.mk
 
