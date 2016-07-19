@@ -29,6 +29,8 @@ delegate:nil \
 cancelButtonTitle:@"OK" \
 otherButtonTitles:nil] show]
 
+#define After(seconds, block) dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^block);
+
 
 #pragma mark Interfaces
 
