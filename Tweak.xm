@@ -18,21 +18,27 @@
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName {
     NSString *frontmostAppID = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
     
-    if ([listenerName isEqualToString:kFLEXingShow] && !frontmostAppID) {
-        [[FLEXManager sharedManager] showExplorer];
-    } else if ([listenerName isEqualToString:kFLEXingToggle] && !frontmostAppID) {
-        [[FLEXManager sharedManager] toggleExplorer];
+    if ([listenerName isEqualToString:kFLEXingShow] ){
+        if (frontmostAppID) {
+            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:kFLEXingShow dictionary:nil replyHandler:^(NSDictionary *response) {
+                event.handled = YES;
+            }];
+        } else {
+            [[FLEXManager sharedManager] showExplorer];
+            event.handled = YES;
+        }
+    }
+    else if ([listenerName isEqualToString:kFLEXingToggle]) {
+        if (frontmostAppID) {
+            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:kFLEXingToggle dictionary:nil replyHandler:^(NSDictionary *response) {
+                event.handled = YES;
+            }];
+        } else {
+            [[FLEXManager sharedManager] toggleExplorer];
+            event.handled = YES;
+        }
     } else {
         event.handled = NO;
-        return;
-    }
-    
-    if (frontmostAppID) {
-        [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:listenerName dictionary:nil replyHandler:^(NSDictionary *response) {
-            event.handled = YES;
-        }];
-    } else {
-        event.handled = YES;
     }
 }
 
