@@ -13,7 +13,7 @@ FLEXing_CFLAGS += -fobjc-arc -w
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 before-stage::
-	find . -name ".DS_STORE" -delete
+	find . -name ".DS_Store" -delete
 
 after-install::
 	install.exec "killall -9 SpringBoard"
