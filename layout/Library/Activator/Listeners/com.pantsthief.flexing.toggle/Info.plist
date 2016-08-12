@@ -1,4 +1,4 @@
 {
-    title = "FLEXing - Toggle";
-    description = "Toggles FLEXing";
+    description = "Toggles the FLEX toolbar";
+    title = "Toggle FLEX";
 }
