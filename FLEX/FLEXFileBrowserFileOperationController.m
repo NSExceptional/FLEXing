@@ -9,8 +9,6 @@
 #import "FLEXFileBrowserFileOperationController.h"
 #import <UIKit/UIKit.h>
 
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 @interface FLEXFileBrowserFileDeleteOperationController () <UIAlertViewDelegate>
 
 @property (nonatomic, copy, readonly) NSString *path;
@@ -34,7 +32,7 @@
     if (self) {
         _path = path;
     }
-    
+
     return self;
 }
 
@@ -42,7 +40,7 @@
 {
     BOOL isDirectory = NO;
     BOOL stillExists = [[NSFileManager defaultManager] fileExistsAtPath:self.path isDirectory:&isDirectory];
-    
+
     if (stillExists) {
         UIAlertView *deleteWarning = [[UIAlertView alloc]
                                       initWithTitle:[NSString stringWithFormat:@"Delete %@?", self.path.lastPathComponent]
@@ -97,7 +95,7 @@
     if (self) {
         _path = path;
     }
-    
+
     return self;
 }
 
@@ -105,7 +103,7 @@
 {
     BOOL isDirectory = NO;
     BOOL stillExists = [[NSFileManager defaultManager] fileExistsAtPath:self.path isDirectory:&isDirectory];
-    
+
     if (stillExists) {
         UIAlertView *renameDialog = [[UIAlertView alloc]
                                      initWithTitle:[NSString stringWithFormat:@"Rename %@?", self.path.lastPathComponent]

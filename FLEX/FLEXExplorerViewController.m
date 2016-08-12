@@ -16,8 +16,6 @@
 #import "FLEXObjectExplorerFactory.h"
 #import "FLEXNetworkHistoryTableViewController.h"
 
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 typedef NS_ENUM(NSUInteger, FLEXExplorerMode) {
     FLEXExplorerModeDefault,
     FLEXExplorerModeSelect,
@@ -93,7 +91,7 @@ typedef NS_ENUM(NSUInteger, FLEXExplorerMode) {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+	
     // Toolbar
     self.explorerToolbar = [[FLEXExplorerToolbar alloc] init];
     CGSize toolbarSize = [self.explorerToolbar sizeThatFits:self.view.bounds.size];
@@ -205,11 +203,11 @@ typedef NS_ENUM(NSUInteger, FLEXExplorerMode) {
         _selectedView = selectedView;
         
         [self beginObservingView:selectedView];
-        
+
         // Update the toolbar and selected overlay
         self.explorerToolbar.selectedViewDescription = [FLEXUtility descriptionForView:selectedView includingFrame:YES];
         self.explorerToolbar.selectedViewOverlayColor = [FLEXUtility consistentRandomColorForObject:selectedView];;
-        
+
         if (selectedView) {
             if (!self.selectedViewOverlay) {
                 self.selectedViewOverlay = [[UIView alloc] init];

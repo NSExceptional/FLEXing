@@ -14,12 +14,9 @@
 #import "FLEXArgumentInputView.h"
 #import "FLEXArgumentInputViewFactory.h"
 
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 @interface FLEXMethodCallingViewController ()
 
 @property (nonatomic, assign) Method method;
-@property (nonatomic, readonly) BOOL isClassMethod;
 
 @end
 
@@ -30,9 +27,7 @@
     self = [super initWithTarget:target];
     if (self) {
         self.method = method;
-        
-        // Title is too long with edit button
-        //        self.title = [self isClassMethod] ? @"Class Method" : @"Method";
+        self.title = [self isClassMethod] ? @"Class Method" : @"Method";
     }
     return self;
 }

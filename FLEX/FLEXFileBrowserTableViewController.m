@@ -13,8 +13,6 @@
 #import "FLEXImagePreviewViewController.h"
 #import "FLEXTableListViewController.h"
 
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 @interface FLEXFileBrowserTableViewCell : UITableViewCell
 @end
 
@@ -76,7 +74,7 @@
                 [strongSelf.tableView reloadData];
             });
         });
-        
+
         [self reloadChildPaths];
     }
     return self;
@@ -87,7 +85,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
     UIMenuItem *renameMenuItem = [[UIMenuItem alloc] initWithTitle:@"Rename" action:@selector(fileBrowserRename:)];
     UIMenuItem *deleteMenuItem = [[UIMenuItem alloc] initWithTitle:@"Delete" action:@selector(fileBrowserDelete:)];
     [UIMenuController sharedMenuController].menuItems = @[renameMenuItem, deleteMenuItem];
@@ -271,7 +269,7 @@
 {
     UIDocumentInteractionController *controller = [UIDocumentInteractionController new];
     controller.URL = [[NSURL alloc] initFileURLWithPath:fullPath];
-    
+
     [controller presentOptionsMenuFromRect:self.view.bounds inView:self.view animated:YES];
     self.documentController = controller;
 }
@@ -280,7 +278,7 @@
 {
     NSIndexPath *indexPath = [self.tableView indexPathForCell:sender];
     NSString *fullPath = [self filePathAtIndexPath:indexPath];
-    
+
     self.fileOperationController = [[FLEXFileBrowserFileRenameOperationController alloc] initWithPath:fullPath];
     self.fileOperationController.delegate = self;
     [self.fileOperationController show];
@@ -320,7 +318,7 @@
 {
     self.searchPaths = nil;
     self.searchPathsSize = nil;
-    
+
     //clear pre search request and start a new one
     [self.operationQueue cancelAllOperations];
     FLEXFileBrowserSearchOperation *newOperation = [[FLEXFileBrowserSearchOperation alloc] initWithPath:self.path searchString:self.searchController.searchBar.text];
