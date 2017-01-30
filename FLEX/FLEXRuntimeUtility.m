@@ -205,20 +205,21 @@ const unsigned int kFLEXNumberOfImplicitArgs = 2;
 + (id)valueForIvar:(Ivar)ivar onObject:(id)object
 {
     id value = nil;
-    const char *type = ivar_getTypeEncoding(ivar);
+    const char *fullTypeEncoding = ivar_getTypeEncoding(ivar);
+    FLEXTypeEncoding type = fullTypeEncoding[0];
 #ifdef __arm64__
     // See http://www.sealiesoftware.com/blog/archive/2013/09/24/objc_explain_Non-pointer_isa.html
     const char *name = ivar_getName(ivar);
-    if (type[0] == @encode(Class)[0] && strcmp(name, "isa") == 0) {
+    if (type == FLEXTypeEncodingObjcClass && strcmp(name, "isa") == 0) {
         value = object_getClass(object);
     } else
 #endif
-    if (type[0] == @encode(id)[0] || type[0] == @encode(Class)[0]) {
+    if (type == FLEXTypeEncodingObjcObject || type == FLEXTypeEncodingObjcClass) {
         value = object_getIvar(object, ivar);
     } else {
         ptrdiff_t offset = ivar_getOffset(ivar);
         void *pointer = (__bridge void *)object + offset;
-        value = [self valueForPrimitivePointer:pointer objCType:type];
+        value = [self valueForPrimitivePointer:pointer objCType:fullTypeEncoding];
     }
     return value;
 }
@@ -308,88 +309,107 @@ const unsigned int kFLEXNumberOfImplicitArgs = 2;
     // Build the invocation
     NSMethodSignature *methodSignature = [object methodSignatureForSelector:selector];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSignature];
-    [invocation setSelector:selector];
-    [invocation setTarget:object];
+    invocation.target = object;
+    invocation.selector = selector;
     [invocation retainArguments];
     
     // Always self and _cmd
-    NSUInteger numberOfArguments = [methodSignature numberOfArguments];
+    NSUInteger numberOfArguments = methodSignature.numberOfArguments;
     for (NSUInteger argumentIndex = kFLEXNumberOfImplicitArgs; argumentIndex < numberOfArguments; argumentIndex++) {
         NSUInteger argumentsArrayIndex = argumentIndex - kFLEXNumberOfImplicitArgs;
-        id argumentObject = [arguments count] > argumentsArrayIndex ? arguments[argumentsArrayIndex] : nil;
+        id argumentObject = arguments.count > argumentsArrayIndex ? arguments[argumentsArrayIndex] : nil;
         
         // NSNull in the arguments array can be passed as a placeholder to indicate nil. We only need to set the argument if it will be non-nil.
         if (argumentObject && ![argumentObject isKindOfClass:[NSNull class]]) {
             const char *typeEncodingCString = [methodSignature getArgumentTypeAtIndex:argumentIndex];
-            if (typeEncodingCString[0] == @encode(id)[0] || typeEncodingCString[0] == @encode(Class)[0] || [self isTollFreeBridgedValue:argumentObject forCFType:typeEncodingCString]) {
+            FLEXTypeEncoding type = typeEncodingCString[0];
+            if (type == FLEXTypeEncodingObjcObject || type == FLEXTypeEncodingObjcClass ||
+                [self isTollFreeBridgedValue:argumentObject forCFType:typeEncodingCString]) {
+
                 // Object
                 [invocation setArgument:&argumentObject atIndex:argumentIndex];
-            } else if (strcmp(typeEncodingCString, @encode(CGColorRef)) == 0 && [argumentObject isKindOfClass:[UIColor class]]) {
+            }
+            else if (strcmp(typeEncodingCString, @encode(CGColorRef)) == 0 && [argumentObject isKindOfClass:[UIColor class]]) {
                 // Bridging UIColor to CGColorRef
                 CGColorRef colorRef = [argumentObject CGColor];
                 [invocation setArgument:&colorRef atIndex:argumentIndex];
-            } else if ([argumentObject isKindOfClass:[NSValue class]]) {
+            }
+            else if ([argumentObject isKindOfClass:[NSValue class]]) {
                 // Primitive boxed in NSValue
                 NSValue *argumentValue = (NSValue *)argumentObject;
                 
                 // Ensure that the type encoding on the NSValue matches the type encoding of the argument in the method signature
-                if (strcmp([argumentValue objCType], typeEncodingCString) != 0) {
+                if (strcmp(argumentValue.objCType, typeEncodingCString) != 0) {
                     if (error) {
-                        NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Type encoding mismatch for agrument at index %lu. Value type: %s; Method argument type: %s.", (unsigned long)argumentsArrayIndex, [argumentValue objCType], typeEncodingCString]};
-                        *error = [NSError errorWithDomain:FLEXRuntimeUtilityErrorDomain code:FLEXRuntimeUtilityErrorCodeArgumentTypeMismatch userInfo:userInfo];
+                        NSString *format = @"Type encoding mismatch for agrument at index %lu. Value type: %s; Method argument type: %s.";
+                        NSString *description = [NSString stringWithFormat:format,
+                                                 (unsigned long)argumentsArrayIndex,
+                                                 argumentValue.objCType,
+                                                 typeEncodingCString];
+                        NSDictionary *userInfo = @{NSLocalizedDescriptionKey: description};
+                        *error = [NSError errorWithDomain:FLEXRuntimeUtilityErrorDomain
+                                                     code:FLEXRuntimeUtilityErrorCodeArgumentTypeMismatch
+                                                 userInfo:userInfo];
                     }
                     return nil;
                 }
                 
-                NSUInteger bufferSize = 0;
                 @try {
+                    NSUInteger bufferSize = 0;
+
                     // NSGetSizeAndAlignment barfs on type encoding for bitfields.
                     NSGetSizeAndAlignment(typeEncodingCString, &bufferSize, NULL);
+
+                    if (bufferSize > 0) {
+                        void *buffer = calloc(bufferSize, 1);
+                        [argumentValue getValue:buffer];
+                        [invocation setArgument:buffer atIndex:argumentIndex];
+                        free(buffer);
+                    }
                 } @catch (NSException *exception) { }
-                
-                if (bufferSize > 0) {
-                    void *buffer = calloc(bufferSize, 1);
-                    [argumentValue getValue:buffer];
-                    [invocation setArgument:buffer atIndex:argumentIndex];
-                    free(buffer);
-                }
             }
         }
     }
     
     // Try to invoke the invocation but guard against an exception being thrown.
-    BOOL successfullyInvoked = NO;
+    id returnObject = nil;
     @try {
         // Some methods are not fit to be called...
         // Looking at you -[UIResponder(UITextInputAdditions) _caretRect]
         [invocation invoke];
-        successfullyInvoked = YES;
-    } @catch (NSException *exception) {
-        // Bummer...
-        if (error) {
-            NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Exception thrown while performing selector %@ on object %@", NSStringFromSelector(selector), object]};
-            *error = [NSError errorWithDomain:FLEXRuntimeUtilityErrorDomain code:FLEXRuntimeUtilityErrorCodeInvocationFailed userInfo:userInfo];
-        }
-    }
-    
-    // Retreive the return value and box if necessary.
-    id returnObject = nil;
-    if (successfullyInvoked) {
-        const char *returnType = [methodSignature methodReturnType];
-        if (returnType[0] == @encode(id)[0] || returnType[0] == @encode(Class)[0]) {
+
+        // Retreive the return value and box if necessary.
+        const char *returnTypeEncoding = methodSignature.methodReturnType;
+        FLEXTypeEncoding returnType = returnTypeEncoding[0];
+
+        if (returnType == FLEXTypeEncodingObjcObject || returnType == FLEXTypeEncodingObjcClass) {
+            // Return value is an object.
             __unsafe_unretained id objectReturnedFromMethod = nil;
             [invocation getReturnValue:&objectReturnedFromMethod];
             returnObject = objectReturnedFromMethod;
-        } else if (returnType[0] != @encode(void)[0]) {
-            void *returnValue = malloc([methodSignature methodReturnLength]);
+        }
+        else if (returnType != FLEXTypeEncodingVoid) {
+            // Will use arbitrary buffer for return value and box it.
+            void *returnValue = malloc(methodSignature.methodReturnLength);
+
             if (returnValue) {
                 [invocation getReturnValue:returnValue];
-                returnObject = [self valueForPrimitivePointer:returnValue objCType:returnType];
+                returnObject = [self valueForPrimitivePointer:returnValue objCType:returnTypeEncoding];
                 free(returnValue);
             }
         }
+    } @catch (NSException *exception) {
+        // Bummer...
+        if (error) {
+            NSString *format = @"Exception thrown while performing selector %@ on object %@";
+            NSString *description = [NSString stringWithFormat:format, NSStringFromSelector(selector), object];
+            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: description};
+            *error = [NSError errorWithDomain:FLEXRuntimeUtilityErrorDomain
+                                         code:FLEXRuntimeUtilityErrorCodeInvocationFailed
+                                     userInfo:userInfo];
+        }
     }
-    
+
     return returnObject;
 }
 

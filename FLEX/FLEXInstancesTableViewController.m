@@ -57,8 +57,8 @@
             Ivar *ivars = class_copyIvarList(tryClass, &ivarCount);
             for (unsigned int ivarIndex = 0; ivarIndex < ivarCount; ivarIndex++) {
                 Ivar ivar = ivars[ivarIndex];
-                const char *typeEncoding = ivar_getTypeEncoding(ivar);
-                if (typeEncoding[0] == @encode(id)[0] || typeEncoding[0] == @encode(Class)[0]) {
+                FLEXTypeEncoding typeEncoding = ivar_getTypeEncoding(ivar)[0];
+                if (typeEncoding == FLEXTypeEncodingObjcObject || typeEncoding == FLEXTypeEncodingObjcClass) {
                     ptrdiff_t offset = ivar_getOffset(ivar);
                     uintptr_t *fieldPointer = (__bridge void *)tryObject + offset;
                     if (*fieldPointer == (uintptr_t)(__bridge void *)object) {

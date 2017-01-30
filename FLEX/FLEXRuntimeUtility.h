@@ -25,6 +25,34 @@ extern NSString *const kFLEXUtilityAttributeWeak;
 extern NSString *const kFLEXUtilityAttributeGarbageCollectable;
 extern NSString *const kFLEXUtilityAttributeOldStyleTypeEncoding;
 
+typedef NS_ENUM(NSUInteger, FLEXTypeEncoding)
+{
+    FLEXTypeEncodingUnknown          = '?',
+    FLEXTypeEncodingChar             = 'c',
+    FLEXTypeEncodingInt              = 'i',
+    FLEXTypeEncodingShort            = 's',
+    FLEXTypeEncodingLong             = 'l',
+    FLEXTypeEncodingLongLong         = 'q',
+    FLEXTypeEncodingUnsignedChar     = 'C',
+    FLEXTypeEncodingUnsignedInt      = 'I',
+    FLEXTypeEncodingUnsignedShort    = 'S',
+    FLEXTypeEncodingUnsignedLong     = 'L',
+    FLEXTypeEncodingUnsignedLongLong = 'Q',
+    FLEXTypeEncodingFloat            = 'f',
+    FLEXTypeEncodingDouble           = 'd',
+    FLEXTypeEncodingCBool            = 'B',
+    FLEXTypeEncodingVoid             = 'v',
+    FLEXTypeEncodingCString          = '*',
+    FLEXTypeEncodingObjcObject       = '@',
+    FLEXTypeEncodingObjcClass        = '#',
+    FLEXTypeEncodingSelector         = ':',
+    FLEXTypeEncodingArray            = '[',
+    FLEXTypeEncodingStruct           = '{',
+    FLEXTypeEncodingUnion            = '(',
+    FLEXTypeEncodingBitField         = 'b',
+    FLEXTypeEncodingPointer          = '^'
+};
+
 #define FLEXEncodeClass(class) ("@\"" #class "\"")
 
 @interface FLEXRuntimeUtility : NSObject
