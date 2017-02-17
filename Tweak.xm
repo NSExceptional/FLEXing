@@ -48,7 +48,12 @@
 %hook UIApplication
 
 - (id)init {
-    NSString *displayID = [self displayIdentifier];
+    id application = self;
+    if ([NSProcessInfo processInfo].operatingSystemVersion.majorVersion > 9) {
+        application = [self class];
+    }
+    
+    NSString *displayID = [application displayIdentifier];
     
     // Register activator handlers in springboard
     if ([displayID isEqualToString:@"com.apple.springboard"]) {
