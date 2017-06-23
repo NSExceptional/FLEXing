@@ -48,19 +48,12 @@
 %hook UIApplication
 
 - (id)init {
-    id application = self;
-    if ([NSProcessInfo processInfo].operatingSystemVersion.majorVersion > 9) {
-        application = [self class];
-    }
-    
-    NSString *displayID = [application displayIdentifier];
-    
     // Register activator handlers in springboard
-    if ([displayID isEqualToString:@"com.apple.springboard"]) {
+    if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
         FLEXingActivatorListenerInstance *FLEXALI = [FLEXingActivatorListenerInstance new];
         [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingShow];
         [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingToggle];
-    } else {
+    } else if (NSClassFromString(@"OBJCIPC")) {
         
         // Register message handlers
         [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingShow handler:^NSDictionary *(NSDictionary *message) {
@@ -72,6 +65,8 @@
             [[FLEXManager sharedManager] toggleExplorer];
             return nil;
         }];
+    } else {
+        NSLog(@"FLEXing: OBJCIPC class not found");
     }
     
     return %orig;
