@@ -9,67 +9,38 @@
 
 #import "Interfaces.h"
 
-
-@interface FLEXingActivatorListenerInstance : NSObject <LAListener>
-@end
-
-@implementation FLEXingActivatorListenerInstance
-
-- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event forListenerName:(NSString *)listenerName {
-    NSString *frontmostAppID = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
+UIView * AddGestures(UIView *view) {
+    id flex = [FLEXManager sharedManager];
+    SEL show = @selector(showExplorer);
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:flex action:show];
+    tap.numberOfTapsRequired = 2;
+    tap.numberOfTouchesRequired = 2;
     
-    if ([listenerName isEqualToString:kFLEXingShow] ){
-        if (frontmostAppID) {
-            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:kFLEXingShow dictionary:nil replyHandler:^(NSDictionary *response) {
-                event.handled = YES;
-            }];
-        } else {
-            [[FLEXManager sharedManager] showExplorer];
-            event.handled = YES;
-        }
-    }
-    else if ([listenerName isEqualToString:kFLEXingToggle]) {
-        if (frontmostAppID) {
-            [OBJCIPC sendMessageToAppWithIdentifier:frontmostAppID messageName:kFLEXingToggle dictionary:nil replyHandler:^(NSDictionary *response) {
-                event.handled = YES;
-            }];
-        } else {
-            [[FLEXManager sharedManager] toggleExplorer];
-            event.handled = YES;
-        }
-    } else {
-        event.handled = NO;
-    }
+    UILongPressGestureRecognizer *tap2 = [[UILongPressGestureRecognizer alloc] initWithTarget:flex action:show];
+    tap2.minimumPressDuration = .5;
+    tap2.numberOfTouchesRequired = 3;
+    
+    [view addGestureRecognizer:tap];
+    [view addGestureRecognizer:tap2];
+
+    return view;
 }
 
-@end
-
-
-%hook UIApplication
-
-- (id)init {
-    // Register activator handlers in springboard
-    if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
-        FLEXingActivatorListenerInstance *FLEXALI = [FLEXingActivatorListenerInstance new];
-        [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingShow];
-        [[LAActivator sharedInstance] registerListener:FLEXALI forName:kFLEXingToggle];
-    } else if (NSClassFromString(@"OBJCIPC")) {
-        
-        // Register message handlers
-        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingShow handler:^NSDictionary *(NSDictionary *message) {
-            [[FLEXManager sharedManager] showExplorer];
-            return nil;
-        }];
-        
-        [OBJCIPC registerIncomingMessageFromSpringBoardHandlerForMessageName:kFLEXingToggle handler:^NSDictionary *(NSDictionary *message) {
-            [[FLEXManager sharedManager] toggleExplorer];
-            return nil;
-        }];
-    } else {
-        NSLog(@"FLEXing: OBJCIPC class not found");
-    }
-    
-    return %orig;
+%group NoActivator
+%hook UIWindow
+- (id)initWithFrame:(CGRect)frame {
+    return AddGestures(%orig(frame));
 }
 
 %end
+%end
+
+%ctor {
+    %init(NoActivator);
+    if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [[FLEXManager sharedManager] showExplorer];
+        });
+        
+    }
+}
