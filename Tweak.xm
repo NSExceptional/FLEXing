@@ -32,6 +32,10 @@ UIView * AddGestures(UIView *view) {
     return AddGestures(%orig(frame));
 }
 
+- (BOOL)_shouldCreateContextAsSecure {
+    return [self isKindOfClass:%c(FLEXWindow)] ? YES : %orig;
+}
+
 %end
 %end
 
