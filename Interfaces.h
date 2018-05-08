@@ -38,6 +38,8 @@ static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
 static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
 
 
+@interface UIStatusBarWindow : UIWindow @end
+
 @interface UIApplication (Private)
 - (id)displayIdentifier;
 @end
