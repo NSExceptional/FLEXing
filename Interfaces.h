@@ -8,20 +8,19 @@
 
 #pragma mark Imports
 
-#import "FLEXManager.h"
 #import <libactivator/libactivator.h>
-#import <objcipc/objcipc.h>
+#import "FLEXNotificationCenter.h"
 
 
 #pragma mark Macros
 
-/// ie PropertyForKey(dateLabel, UILabel *, UITableViewCell)
-#define PropertyForKey(key, propertyType, class) \
-@interface class (key) @property (readonly) propertyType key; @end \
-@implementation class (key) - (propertyType)key { return [self valueForKey:@"_"@#key]; } @end
+#define isSpringBoard [[NSBundle mainBundle].bundleIdentifier isEqualToString:kSpringBoard]
 
-#define RWPropertyInf(key, propertyType, class) \
-@interface class (key) @property propertyType key; @end
+#if DEBUG
+#define Log(...) NSLog(@"*** FLEXing\n"__VA_ARGS__)
+#else
+#define Log(...)
+#endif
 
 #define Alert(TITLE,MSG) [[[UIAlertView alloc] initWithTitle:(TITLE) \
 message:(MSG) \
@@ -33,10 +32,6 @@ otherButtonTitles:nil] show]
 
 
 #pragma mark Interfaces
-
-static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
-static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
-
 
 @interface UIApplication (Private)
 - (id)displayIdentifier;
