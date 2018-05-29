@@ -2,7 +2,7 @@ Package: com.pantsthief.flexing
 Name: FLEXing
 Pre-Depends: firmware (>= 8.0)
 Depends: mobilesubstrate, libactivator
-Version: 0.0.5
+Version: 0.0.6
 Architecture: iphoneos-arm
 Description: Open FLEX anywhere with Activator!
 Maintainer: Tanner Bennett
