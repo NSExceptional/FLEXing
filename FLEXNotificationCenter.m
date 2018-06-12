@@ -11,6 +11,8 @@
 #import "AppSupport/CPDistributedNotificationCenter.h"
 #import "FLEXManager.h"
 
+void rocketbootstrap_distributednotificationcenter_apply(CPDistributedNotificationCenter *notification_center);
+
 static NSString * const kCenterName    = @"com.pantsthief.FLEXingNotificationCenter";
 static NSString * const kSpringBoard   = @"com.apple.springboard";
 static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
@@ -28,6 +30,7 @@ static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
     if (!shared) {
         shared = [self new];
         shared->_center = [CPDistributedNotificationCenter centerNamed:kCenterName];
+        rocketbootstrap_distributednotificationcenter_apply(shared->_center);
         if (isSpringBoard) {
             shared->_clients = [NSMutableSet set];
             [[LAActivator sharedInstance] registerListener:shared forName:kFLEXingShow];
