@@ -2,7 +2,7 @@ Package: com.pantsthief.flexing
 Name: FLEXing
 Pre-Depends: firmware (>= 8.0)
 Depends: 
-Version: 0.0.7
+Version: 0.0.8
 Architecture: iphoneos-arm
 Description: Open FLEX anywhere!
 Maintainer: Tanner Bennett
