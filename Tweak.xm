@@ -29,9 +29,4 @@
 
 %ctor {
     %init(NoActivator);
-    if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [[FLEXManager sharedManager] showExplorer];
-        });
-    }
 }
