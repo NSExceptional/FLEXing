@@ -13,6 +13,23 @@
 - (BOOL)_shouldCreateContextAsSecure {
     return [self isKindOfClass:%c(FLEXWindow)] ? YES : %orig;
 }
+
+- (id)initWithFrame:(CGRect)frame {
+    self = %orig(frame);
+    
+    id flex = [FLEXManager sharedManager];
+    SEL toggle = @selector(toggleExplorer);
+    SEL show = @selector(showExplorer);
+    
+    UILongPressGestureRecognizer *tap = [[UILongPressGestureRecognizer alloc] initWithTarget:flex action:show];
+    tap.minimumPressDuration = .5;
+    tap.numberOfTouchesRequired = 3;
+    
+    [self addGestureRecognizer:tap];
+    
+    return self;
+}
+
 %end
 
 %hook UIStatusBarWindow
