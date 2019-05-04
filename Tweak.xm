@@ -41,3 +41,10 @@
     return self;
 }
 %end
+
+%hook NSObject
+%new
++ (NSBundle *)__bundle__ {
+    return [NSBundle bundleForClass:self];
+}
+%end
