@@ -8,10 +8,8 @@
 
 #pragma mark Imports
 
-#import "FLEXManager.h"
-#import <libactivator/libactivator.h>
-#import <objcipc/objcipc.h>
-
+#import <Foundation/Foundation.h>
+#include <dlfcn.h>
 
 #pragma mark Macros
 

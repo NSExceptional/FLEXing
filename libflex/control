@@ -1,0 +1,10 @@
+Package: libflex
+Name: FLEX
+Pre-Depends: firmware (>= 9.0)
+Depends: 
+Version: 3.1.0
+Architecture: iphoneos-arm
+Description: A library for Flipboard Explorer.
+Maintainer: Tanner Bennett
+Author: Tanner Bennett
+Section: Tweaks
