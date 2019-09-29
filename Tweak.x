@@ -46,7 +46,7 @@
     
     if ((self = %orig)) {
 
-        [self addGestureRecognizer:[[UILongPressGestureRecognizer alloc] initWithTarget:FLEXManager.sharedManager action:@selector(__flexer_toggleExplorer:)]];
+        [self addGestureRecognizer:[[UILongPressGestureRecognizer alloc] initWithTarget:FLEXManager.sharedManager action:@selector(__flexing_toggleExplorer:)]];
     }
 
     return self;
