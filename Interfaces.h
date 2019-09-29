@@ -9,37 +9,16 @@
 #pragma mark Imports
 
 #import "FLEXManager.h"
-#import <libactivator/libactivator.h>
-#import <objcipc/objcipc.h>
-
-
-#pragma mark Macros
-
-#define Alert(TITLE,MSG) [[[UIAlertView alloc] initWithTitle:(TITLE) \
-message:(MSG) \
-delegate:nil \
-cancelButtonTitle:@"OK" \
-otherButtonTitles:nil] show]
-
-#define After(seconds, block) dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^block);
-
 
 #pragma mark Interfaces
 
-static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
-static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
-
-
-@interface UIStatusBarWindow : UIWindow @end
-
-@interface UIApplication (Private)
-- (id)displayIdentifier;
+@interface FLEXManager : NSObject
++ (instancetype)sharedManager;
+- (void)toggleExplorer;
 @end
 
-@interface SBApplication
-- (NSString *)bundleIdentifier;
+@interface FLEXWindow : UIWindow 
 @end
 
-@interface SpringBoard : UIApplication
-- (SBApplication *)_accessibilityFrontMostApplication;
+@interface UIStatusBarWindow : UIWindow 
 @end

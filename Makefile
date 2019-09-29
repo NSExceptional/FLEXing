@@ -18,8 +18,8 @@ IMPORTS = -I$(FLEX_ROOT)/Classes/ $(call dtoim, $(_IMPORTS))
 
 TWEAK_NAME = FLEXing
 FLEXing_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore
-FLEXing_FILES = Tweak.xm $(SOURCES)
-FLEXing_LIBRARIES = sqlite3 z #objcipc #activator
+FLEXing_FILES = Tweak.x $(SOURCES)
+FLEXing_LIBRARIES = sqlite3 z
 FLEXing_CFLAGS += -fobjc-arc -w $(IMPORTS)
 
 include $(THEOS_MAKE_PATH)/tweak.mk
