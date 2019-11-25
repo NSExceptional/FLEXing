@@ -8,3 +8,4 @@ Description: Open FLEX anywhere!
 Maintainer: Tanner Bennett
 Author: Tanner Bennett
 Section: Tweaks
+Conflicts: com.dgh0st.flexall, gg.gh0stbyte.flexivator, com.shmoopillic.flexible, applebetas.ios.tweak.devtools.flexgesture, com.creaturecoding.flexer, com.lacertosusrepo.flex4me, me.nepeta.flexxx, com.ipadkid.flexit, com.qiop1379.flexbar, com.leftyfl1p.reflex
