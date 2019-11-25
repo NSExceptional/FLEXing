@@ -9,9 +9,11 @@
 
 #import "Interfaces.h"
 
-static BOOL initialized = NO;
-static id manager = nil;
-static SEL show = nil;
+BOOL initialized = NO;
+id manager = nil;
+SEL show = nil;
+
+static NSMutableArray *windowsWithGestures = nil;
 
 static id (*FLXGetManager)();
 static SEL (*FLXRevealSEL)();
@@ -48,6 +50,8 @@ inline bool isSnapchatApp() {
 
         manager = FLXGetManager();
         show = FLXRevealSEL();
+
+        windowsWithGestures = [NSMutableArray new];
         initialized = YES;
     }
 }
@@ -57,10 +61,15 @@ inline bool isSnapchatApp() {
     return (initialized && [self isKindOfClass:FLXWindowClass()]) ? YES : %orig;
 }
 
-- (id)initWithFrame:(CGRect)frame {
-    self = %orig(frame);
+- (void)becomeKeyWindow {
+    %orig;
 
-    if (initialized) {
+    BOOL needsGesture = ![windowsWithGestures containsObject:self];
+    BOOL isFLEXWindow = [self isKindOfClass:FLXWindowClass()];
+    BOOL isStatusBar  = [self isKindOfClass:[UIStatusBarWindow class]];
+    if (initialized && needsGesture && !isFLEXWindow && !isStatusBar) {
+        [windowsWithGestures addObject:self];
+
         // Add 3-finger long-press gesture for apps without a status bar
         UILongPressGestureRecognizer *tap = [[UILongPressGestureRecognizer alloc] initWithTarget:manager action:show];
         tap.minimumPressDuration = .5;
@@ -68,10 +77,7 @@ inline bool isSnapchatApp() {
 
         [self addGestureRecognizer:tap];
     }
-    
-    return self;
 }
-
 %end
 
 %hook UIStatusBarWindow

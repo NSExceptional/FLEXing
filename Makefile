@@ -3,7 +3,7 @@ export TARGET = iphone:latest:9.0
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = FLEXing
-FLEXing_FILES = Tweak.xm
+FLEXing_FILES = Tweak.xm SpringBoard.xm
 FLEXing_CFLAGS += -fobjc-arc -w
 
 include $(THEOS_MAKE_PATH)/tweak.mk
@@ -22,8 +22,3 @@ print-%  : ; @echo $* = $($*)
 #
 # SUBPROJECTS += libflex
 # include $(THEOS_MAKE_PATH)/aggregate.mk
-
-all:
-	make -C libflex all
-	make all
-	

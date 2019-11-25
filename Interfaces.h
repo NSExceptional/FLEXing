@@ -11,22 +11,38 @@
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
 
+
+#pragma mark Globals
+
+#define kFLEXLongPressGesture 0xdeadbabe
+
+extern BOOL initialized;
+extern id manager;
+extern SEL show;
+
+// TODO: activator support
+// static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
+// static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
+
+
 #pragma mark Macros
 
-#define Alert(TITLE,MSG) [[[UIAlertView alloc] initWithTitle:(TITLE) \
-message:(MSG) \
-delegate:nil \
-cancelButtonTitle:@"OK" \
-otherButtonTitles:nil] show]
+#define Alert(TITLE,MSG) [[[UIAlertView alloc] \
+    initWithTitle:(TITLE) \
+    message:(MSG) \
+    delegate:nil \
+    cancelButtonTitle:@"OK" \
+    otherButtonTitles:nil] show \
+]
 
-#define After(seconds, block) dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^block);
+#define Async(block) dispatch_async(dispatch_get_main_queue(), block)
+#define After(seconds, block) dispatch_after( \
+    dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), \
+    dispatch_get_main_queue(), ^block \
+);
 
 
 #pragma mark Interfaces
-
-static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
-static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
-
 
 @interface UIStatusBarWindow : UIWindow @end
 
@@ -40,4 +56,14 @@ static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
 
 @interface SpringBoard : UIApplication
 - (SBApplication *)_accessibilityFrontMostApplication;
+@end
+
+// iOS 13 //
+
+@interface UIStatusBarTapAction : NSObject
+@property (nonatomic, readonly) NSInteger type;
+@end
+
+@interface SBMainDisplaySceneLayoutStatusBarView : UIView
+- (void)_statusBarTapped:(id)sender type:(NSInteger)type;
 @end
