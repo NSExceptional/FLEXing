@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        ".vscode": true,
+        "*.plist": true,
+        "**/.git*": true,
+        "**/.theos": true,
+        "**/.travis.yml": true,
+        "**/*.xcodeproj": true,
+        "**/*.xcworkspace": true,
+        "**/LICENSE": true,
+        "Licenses": true
+    }
+}
