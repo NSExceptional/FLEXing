@@ -97,6 +97,12 @@ inline bool isSnapchatApp() {
 }
 %end
 
+%hook FLEXExplorerViewController
+- (BOOL)_canShowWhileLocked {
+    return YES;
+}
+%end
+
 // Easily determine the bundle of a specific class within FLEX
 // TODO: Move this into the FLEX codebase itself.
 %hook NSObject
