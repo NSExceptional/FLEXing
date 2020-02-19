@@ -31,6 +31,10 @@ inline bool isLikelyUIProcess() {
 inline bool isSnapchatApp() {
     // See: near line 44 below
     return [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.toyopagroup.picaboo"];
+}
+
+inline BOOL flexAlreadyLoaded() {
+    return NSClassFromString(@"FLEXExplorerToolbar") != nil;
 } 
 
 %ctor {
@@ -41,7 +45,7 @@ inline bool isSnapchatApp() {
     if ([disk fileExistsAtPath:standardPath]) {
         // Hey Snapchat / Snap Inc devs,
         // This is so users don't get their accounts locked.
-        if (isLikelyUIProcess() && !isSnapchatApp()) {
+        if (isLikelyUIProcess() && !flexAlreadyLoaded() && !isSnapchatApp()) {
             handle = dlopen(standardPath.UTF8String, RTLD_LAZY);
         }
     } else {
