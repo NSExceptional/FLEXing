@@ -9,18 +9,20 @@ FLEX_ROOT = FLEX
 dtoim = $(foreach d,$(1),-I$(d))
 
 # Gather FLEX sources
-SOURCES  = $(shell find $(FLEX_ROOT)/Classes -name '*.m')
+SOURCES  = $(shell find $(FLEX_ROOT)/Classes -name '*.c')
+SOURCES += $(shell find $(FLEX_ROOT)/Classes -name '*.m')
 SOURCES += $(shell find $(FLEX_ROOT)/Classes -name '*.mm')
 # Gather FLEX headers for search paths
 _IMPORTS  = $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/)
 _IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/)
+_IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/*/)
 IMPORTS = -I$(FLEX_ROOT)/Classes/ $(call dtoim, $(_IMPORTS))
 
 TWEAK_NAME = libFLEX
 libFLEX_FILES = libFLEX.m $(SOURCES)
 libFLEX_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore
 libFLEX_LIBRARIES = sqlite3 z
-libFLEX_CFLAGS += -fobjc-arc -w -Wno-unsupported-availability-guard $(IMPORTS)
+libFLEX_CFLAGS += -fobjc-arc -w -Wno-unsupported-availability-guard $(IMPORTS) -g
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
