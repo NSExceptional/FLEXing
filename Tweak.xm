@@ -19,8 +19,17 @@ static id (*FLXGetManager)();
 static SEL (*FLXRevealSEL)();
 static Class (*FLXWindowClass)();
 
+/// This isn't perfect, but works for most cases as intended
+inline bool isLikelyUIProcess() {
+    NSString *executablePath = NSProcessInfo.processInfo.arguments[0];
+
+    return [executablePath hasPrefix:@"/var/containers/Bundle/Application"] ||
+        [executablePath hasPrefix:@"/Applications"] ||
+        [executablePath hasSuffix:@"CoreServices/SpringBoard.app/SpringBoard"];
+}
+
 inline bool isSnapchatApp() {
-    // See: near line 31 below
+    // See: near line 44 below
     return [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.toyopagroup.picaboo"];
 } 
 
@@ -32,7 +41,7 @@ inline bool isSnapchatApp() {
     if ([disk fileExistsAtPath:standardPath]) {
         // Hey Snapchat / Snap Inc devs,
         // This is so users don't get their accounts locked.
-        if (!isSnapchatApp()) {
+        if (isLikelyUIProcess() && !isSnapchatApp()) {
             handle = dlopen(standardPath.UTF8String, RTLD_LAZY);
         }
     } else {
