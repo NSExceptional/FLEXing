@@ -1,4 +1,4 @@
-export TARGET = iphone:9.0:9.0
+export TARGET = iphone:latest:9.0
 include $(THEOS)/makefiles/common.mk
 
 # FULL PATH of the FLEX repo on your own machine
@@ -8,7 +8,9 @@ FLEX_ROOT = /Users/tanner/Repos/FLEX
 dtoim = $(foreach d,$(1),-I$(d))
 
 # Gather FLEX sources
-SOURCES = $(shell find $(FLEX_ROOT)/Classes -name '*.m')
+SOURCES  = $(shell find $(FLEX_ROOT)/Classes -name '*.c')
+SOURCES += $(shell find $(FLEX_ROOT)/Classes -name '*.m')
+SOURCES += $(shell find $(FLEX_ROOT)/Classes -name '*.mm')
 # Gather FLEX headers for search paths
 _IMPORTS =  $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/)
 _IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/)
