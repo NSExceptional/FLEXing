@@ -16,6 +16,7 @@ SOURCES += $(shell find $(FLEX_ROOT)/Classes -name '*.mm')
 _IMPORTS  = $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/)
 _IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/)
 _IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/*/)
+_IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/*/*/)
 IMPORTS = -I$(FLEX_ROOT)/Classes/ $(call dtoim, $(_IMPORTS))
 
 TWEAK_NAME = libFLEX
