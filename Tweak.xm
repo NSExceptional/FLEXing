@@ -13,7 +13,7 @@ BOOL initialized = NO;
 id manager = nil;
 SEL show = nil;
 
-static NSMutableArray *windowsWithGestures = nil;
+static NSHashTable *windowsWithGestures = nil;
 
 static id (*FLXGetManager)();
 static SEL (*FLXRevealSEL)();
@@ -64,7 +64,7 @@ inline BOOL flexAlreadyLoaded() {
         manager = FLXGetManager();
         show = FLXRevealSEL();
 
-        windowsWithGestures = [NSMutableArray new];
+        windowsWithGestures = [NSHashTable weakObjectsHashTable];
         initialized = YES;
     }
 }
