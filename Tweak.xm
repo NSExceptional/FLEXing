@@ -40,20 +40,33 @@ inline BOOL flexAlreadyLoaded() {
 %ctor {
     NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
     NSFileManager *disk = NSFileManager.defaultManager;
+    NSString *libflex = nil;
     void *handle = nil;
 
     if ([disk fileExistsAtPath:standardPath]) {
-        // Hey Snapchat / Snap Inc devs,
-        // This is so users don't get their accounts locked.
-        if (isLikelyUIProcess() && !flexAlreadyLoaded() && !isSnapchatApp()) {
-            handle = dlopen(standardPath.UTF8String, RTLD_LAZY);
-        }
+        libflex = standardPath;
     } else {
-        // libFLEX not found
-        // ...
+        // Check if libFLEX resides in the same folder as me
+        NSString *executablePath = NSProcessInfo.processInfo.arguments[0];
+        NSString *whereIam = executablePath.stringByDeletingLastPathComponent;
+        NSString *possiblePath = [whereIam stringByAppendingPathComponent:@"Frameworks/libFLEX.dylib"];
+        if ([disk fileExistsAtPath:possiblePath]) {
+            libflex = possiblePath;
+        } else {
+            // libFLEX not found
+            // ...
+        }
     }
 
-    if (handle) {
+    if (libflex) {
+        // Hey Snapchat / Snap Inc devs,
+        // This is so users don't get their accounts locked.
+        if (isLikelyUIProcess() && !isSnapchatApp()) {
+            handle = dlopen(libflex.UTF8String, RTLD_LAZY);
+        }
+    }
+
+    if (handle || flexAlreadyLoaded()) {
         // FLEXing.dylib itself does not hard-link against libFLEX.dylib,
         // instead libFLEX.dylib provides getters for the relevant class
         // objects so that it can be updated independently of THIS tweak.
@@ -61,11 +74,13 @@ inline BOOL flexAlreadyLoaded() {
         FLXRevealSEL = (SEL(*)())dlsym(handle, "FLXRevealSEL");
         FLXWindowClass = (Class(*)())dlsym(handle, "FLXWindowClass");
 
-        manager = FLXGetManager();
-        show = FLXRevealSEL();
+        if (FLXGetManager && FLXRevealSEL) {
+            manager = FLXGetManager();
+            show = FLXRevealSEL();
 
-        windowsWithGestures = [NSHashTable weakObjectsHashTable];
-        initialized = YES;
+            windowsWithGestures = [NSHashTable weakObjectsHashTable];
+            initialized = YES;
+        }
     }
 }
 
@@ -113,14 +128,5 @@ inline BOOL flexAlreadyLoaded() {
 %hook FLEXExplorerViewController
 - (BOOL)_canShowWhileLocked {
     return YES;
-}
-%end
-
-// Easily determine the bundle of a specific class within FLEX
-// TODO: Move this into the FLEX codebase itself.
-%hook NSObject
-%new
-+ (NSBundle *)__bundle__ {
-    return [NSBundle bundleForClass:self];
 }
 %end
