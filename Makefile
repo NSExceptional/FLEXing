@@ -3,6 +3,7 @@ export TARGET = iphone:latest:9.0
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = FLEXing
+FLEXing_GENERATOR = internal
 FLEXing_FILES = Tweak.xm SpringBoard.xm
 FLEXing_CFLAGS += -fobjc-arc -w
 
