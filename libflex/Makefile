@@ -20,7 +20,7 @@ _IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/*/*/)
 IMPORTS = -I$(FLEX_ROOT)/Classes/ $(call dtoim, $(_IMPORTS))
 
 TWEAK_NAME = libFLEX
-$(TWEAK_NAME)_FILES = libFLEX.m $(SOURCES)
+$(TWEAK_NAME)_FILES = libFLEX.x $(SOURCES)
 $(TWEAK_NAME)_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore
 $(TWEAK_NAME)_LIBRARIES = sqlite3 z
 $(TWEAK_NAME)_CFLAGS += -fobjc-arc -w -Wno-unsupported-availability-guard $(IMPORTS) -g
