@@ -67,3 +67,7 @@ extern SEL show;
 @interface SBMainDisplaySceneLayoutStatusBarView : UIView
 - (void)_statusBarTapped:(id)sender type:(NSInteger)type;
 @end
+
+@interface _UISheetPresentationController : UIPresentationController
+@property (setter=_setPresentsAtStandardHalfHeight:) BOOL _presentsAtStandardHalfHeight;
+@end

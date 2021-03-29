@@ -130,3 +130,14 @@ inline BOOL flexAlreadyLoaded() {
     return YES;
 }
 %end
+
+%hook _UISheetPresentationController
+- (id)initWithPresentedViewController:(id)present presentingViewController:(id)presenter {
+    self = %orig;
+    if ([present isKindOfClass:%c(FLEXNavigationController)]) {
+        self._presentsAtStandardHalfHeight = YES;
+    }
+    
+    return self;
+}
+%end
