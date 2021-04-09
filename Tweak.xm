@@ -135,7 +135,10 @@ inline BOOL flexAlreadyLoaded() {
 - (id)initWithPresentedViewController:(id)present presentingViewController:(id)presenter {
     self = %orig;
     if ([present isKindOfClass:%c(FLEXNavigationController)]) {
+        // Enable half height sheet
         self._presentsAtStandardHalfHeight = YES;
+        // Start fullscreen, 0 for half height
+        self._indexOfCurrentDetent = 1;
     }
     
     return self;

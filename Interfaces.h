@@ -69,5 +69,9 @@ extern SEL show;
 @end
 
 @interface _UISheetPresentationController : UIPresentationController
+@property (setter=_setDetents:) NSArray *_detents;
+@property (setter=_setWantsFullScreen:) BOOL _wantsFullScreen;
+@property (setter=_setIndexOfCurrentDetent:) BOOL _indexOfCurrentDetent;
+@property (setter=_setAllowsInteractiveDismissWhenFullScreen:) BOOL _allowsInteractiveDismissWhenFullScreen;
 @property (setter=_setPresentsAtStandardHalfHeight:) BOOL _presentsAtStandardHalfHeight;
 @end
