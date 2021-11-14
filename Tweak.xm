@@ -139,6 +139,10 @@ inline BOOL flexAlreadyLoaded() {
         self._presentsAtStandardHalfHeight = YES;
         // Start fullscreen, 0 for half height
         self._indexOfCurrentDetent = 1;
+        // Don't expand unless dragged up
+        self._prefersScrollingExpandsToLargerDetentWhenScrolledToEdge = NO;
+        // Don't dim first detent
+        self._indexOfLastUndimmedDetent = 1;
     }
     
     return self;
