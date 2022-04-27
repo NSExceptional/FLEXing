@@ -2,3 +2,8 @@
 	path = libflex/FLEX
 	url = https://github.com/NSExceptional/FLEX
 	branch = flexing
+
+[submodule "libreflex/Reflex"]
+	path = libreflex/Reflex
+	url = https://github.com/FLEXTool/Reflex
+	branch = libreflex
