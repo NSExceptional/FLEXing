@@ -76,4 +76,6 @@ extern SEL show;
 @property (setter=_setIndexOfLastUndimmedDetent:) BOOL _indexOfLastUndimmedDetent;
 @property (setter=_setAllowsInteractiveDismissWhenFullScreen:) BOOL _allowsInteractiveDismissWhenFullScreen;
 @property (setter=_setPresentsAtStandardHalfHeight:) BOOL _presentsAtStandardHalfHeight;
+@property (setter=_setPrefersScrollingExpandsToLargerDetentWhenScrolledToEdge:)
+           BOOL _prefersScrollingExpandsToLargerDetentWhenScrolledToEdge; 
 @end
