@@ -39,19 +39,28 @@ inline BOOL flexAlreadyLoaded() {
 
 %ctor {
     NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
+    NSString *reflexPath =   @"/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib";
     NSFileManager *disk = NSFileManager.defaultManager;
     NSString *libflex = nil;
+    NSString *libreflex = nil;
     void *handle = nil;
 
     if ([disk fileExistsAtPath:standardPath]) {
         libflex = standardPath;
+        if ([disk fileExistsAtPath:reflexPath]) {
+            libreflex = reflexPath;
+        }
     } else {
         // Check if libFLEX resides in the same folder as me
         NSString *executablePath = NSProcessInfo.processInfo.arguments[0];
         NSString *whereIam = executablePath.stringByDeletingLastPathComponent;
-        NSString *possiblePath = [whereIam stringByAppendingPathComponent:@"Frameworks/libFLEX.dylib"];
-        if ([disk fileExistsAtPath:possiblePath]) {
-            libflex = possiblePath;
+        NSString *possibleFlexPath = [whereIam stringByAppendingPathComponent:@"Frameworks/libFLEX.dylib"];
+        NSString *possibleRelexPath = [whereIam stringByAppendingPathComponent:@"Frameworks/libreflex.dylib"];
+        if ([disk fileExistsAtPath:possibleFlexPath]) {
+            libflex = possibleFlexPath;
+            if ([disk fileExistsAtPath:possibleRelexPath]) {
+                libreflex = possibleRelexPath;
+            }
         } else {
             // libFLEX not found
             // ...
@@ -63,6 +72,10 @@ inline BOOL flexAlreadyLoaded() {
         // This is so users don't get their accounts locked.
         if (isLikelyUIProcess() && !isSnapchatApp()) {
             handle = dlopen(libflex.UTF8String, RTLD_LAZY);
+            
+            if (libreflex) {
+                dlopen(libreflex.UTF8String, RTLD_NOW);
+            }
         }
     }
 
@@ -146,5 +159,16 @@ inline BOOL flexAlreadyLoaded() {
     }
     
     return self;
+}
+%end
+
+%hook FLEXManager
+%new
++ (NSString *)dlopen:(NSString *)path {
+    if (!dlopen(path.UTF8String, RTLD_NOW)) {
+        return @(dlerror());
+    }
+    
+    return @"OK";
 }
 %end

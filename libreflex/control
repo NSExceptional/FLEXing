@@ -1,7 +1,6 @@
 Package: libreflex
 Name: libReflex
 Pre-Depends: firmware (>= 13.0)
-Depends: ${LIBSWIFT}
 Version: 1.0.0
 Architecture: iphoneos-arm
 Description: A FLEX extension for Swift object introspection.
