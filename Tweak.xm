@@ -13,7 +13,7 @@ BOOL initialized = NO;
 id manager = nil;
 SEL show = nil;
 
-static NSMutableArray *windowsWithGestures = nil;
+static NSHashTable *windowsWithGestures = nil;
 
 static id (*FLXGetManager)();
 static SEL (*FLXRevealSEL)();
@@ -39,21 +39,47 @@ inline BOOL flexAlreadyLoaded() {
 
 %ctor {
     NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
+    NSString *reflexPath =   @"/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib";
     NSFileManager *disk = NSFileManager.defaultManager;
+    NSString *libflex = nil;
+    NSString *libreflex = nil;
     void *handle = nil;
 
     if ([disk fileExistsAtPath:standardPath]) {
-        // Hey Snapchat / Snap Inc devs,
-        // This is so users don't get their accounts locked.
-        if (isLikelyUIProcess() && !flexAlreadyLoaded() && !isSnapchatApp()) {
-            handle = dlopen(standardPath.UTF8String, RTLD_LAZY);
+        libflex = standardPath;
+        if ([disk fileExistsAtPath:reflexPath]) {
+            libreflex = reflexPath;
         }
     } else {
-        // libFLEX not found
-        // ...
+        // Check if libFLEX resides in the same folder as me
+        NSString *executablePath = NSProcessInfo.processInfo.arguments[0];
+        NSString *whereIam = executablePath.stringByDeletingLastPathComponent;
+        NSString *possibleFlexPath = [whereIam stringByAppendingPathComponent:@"Frameworks/libFLEX.dylib"];
+        NSString *possibleRelexPath = [whereIam stringByAppendingPathComponent:@"Frameworks/libreflex.dylib"];
+        if ([disk fileExistsAtPath:possibleFlexPath]) {
+            libflex = possibleFlexPath;
+            if ([disk fileExistsAtPath:possibleRelexPath]) {
+                libreflex = possibleRelexPath;
+            }
+        } else {
+            // libFLEX not found
+            // ...
+        }
     }
 
-    if (handle) {
+    if (libflex) {
+        // Hey Snapchat / Snap Inc devs,
+        // This is so users don't get their accounts locked.
+        if (isLikelyUIProcess() && !isSnapchatApp()) {
+            handle = dlopen(libflex.UTF8String, RTLD_LAZY);
+            
+            if (libreflex) {
+                dlopen(libreflex.UTF8String, RTLD_NOW);
+            }
+        }
+    }
+
+    if (handle || flexAlreadyLoaded()) {
         // FLEXing.dylib itself does not hard-link against libFLEX.dylib,
         // instead libFLEX.dylib provides getters for the relevant class
         // objects so that it can be updated independently of THIS tweak.
@@ -61,11 +87,13 @@ inline BOOL flexAlreadyLoaded() {
         FLXRevealSEL = (SEL(*)())dlsym(handle, "FLXRevealSEL");
         FLXWindowClass = (Class(*)())dlsym(handle, "FLXWindowClass");
 
-        manager = FLXGetManager();
-        show = FLXRevealSEL();
+        if (FLXGetManager && FLXRevealSEL) {
+            manager = FLXGetManager();
+            show = FLXRevealSEL();
 
-        windowsWithGestures = [NSMutableArray new];
-        initialized = YES;
+            windowsWithGestures = [NSHashTable weakObjectsHashTable];
+            initialized = YES;
+        }
     }
 }
 
@@ -116,11 +144,31 @@ inline BOOL flexAlreadyLoaded() {
 }
 %end
 
-// Easily determine the bundle of a specific class within FLEX
-// TODO: Move this into the FLEX codebase itself.
-%hook NSObject
+%hook _UISheetPresentationController
+- (id)initWithPresentedViewController:(id)present presentingViewController:(id)presenter {
+    self = %orig;
+    if ([present isKindOfClass:%c(FLEXNavigationController)]) {
+        // Enable half height sheet
+        self._presentsAtStandardHalfHeight = YES;
+        // Start fullscreen, 0 for half height
+        self._indexOfCurrentDetent = 1;
+        // Don't expand unless dragged up
+        self._prefersScrollingExpandsToLargerDetentWhenScrolledToEdge = NO;
+        // Don't dim first detent
+        self._indexOfLastUndimmedDetent = 1;
+    }
+    
+    return self;
+}
+%end
+
+%hook FLEXManager
 %new
-+ (NSBundle *)__bundle__ {
-    return [NSBundle bundleForClass:self];
++ (NSString *)dlopen:(NSString *)path {
+    if (!dlopen(path.UTF8String, RTLD_NOW)) {
+        return @(dlerror());
+    }
+    
+    return @"OK";
 }
 %end

@@ -8,7 +8,7 @@
 
 #pragma mark Imports
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #include <dlfcn.h>
 
 
@@ -66,4 +66,16 @@ extern SEL show;
 
 @interface SBMainDisplaySceneLayoutStatusBarView : UIView
 - (void)_statusBarTapped:(id)sender type:(NSInteger)type;
+@end
+
+@interface _UISheetPresentationController : UIPresentationController
+@property (setter=_setDetents:) NSArray *_detents;
+@property (setter=_setWantsFullScreen:) BOOL _wantsFullScreen;
+@property (setter=_setIndexOfCurrentDetent:) BOOL _indexOfCurrentDetent;
+@property (setter=_setDimmingViewTapDismissing:) BOOL _isDimmingViewTapDismissing;
+@property (setter=_setIndexOfLastUndimmedDetent:) BOOL _indexOfLastUndimmedDetent;
+@property (setter=_setAllowsInteractiveDismissWhenFullScreen:) BOOL _allowsInteractiveDismissWhenFullScreen;
+@property (setter=_setPresentsAtStandardHalfHeight:) BOOL _presentsAtStandardHalfHeight;
+@property (setter=_setPrefersScrollingExpandsToLargerDetentWhenScrolledToEdge:)
+           BOOL _prefersScrollingExpandsToLargerDetentWhenScrolledToEdge; 
 @end

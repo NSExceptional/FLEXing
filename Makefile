@@ -1,18 +1,17 @@
 export ARCHS = arm64 armv7 armv7s arm64e
 export TARGET = iphone:latest:9.0
+INSTALL_TARGET_PROCESSES = SpringBoard
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = FLEXing
-FLEXing_FILES = Tweak.xm SpringBoard.xm
-FLEXing_CFLAGS += -fobjc-arc -w
+$(TWEAK_NAME)_GENERATOR = internal
+$(TWEAK_NAME)_FILES = Tweak.xm SpringBoard.xm
+$(TWEAK_NAME)_CFLAGS += -fobjc-arc -w
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 before-stage::
 	find . -name ".DS_Store" -delete
-
-after-install::
-	install.exec "killall -9 SpringBoard"
 
 # For printing variables from the makefile
 print-%  : ; @echo $* = $($*)
