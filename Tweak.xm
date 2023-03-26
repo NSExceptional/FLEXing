@@ -149,7 +149,10 @@ inline BOOL flexAlreadyLoaded() {
     self = %orig;
     if ([present isKindOfClass:%c(FLEXNavigationController)]) {
         // Enable half height sheet
-        self._presentsAtStandardHalfHeight = YES;
+        if ([self respondsToSelector:@selector(_presentsAtStandardHalfHeight)])
+            self._presentsAtStandardHalfHeight = YES;
+        else
+            self._detents = @[[%c(_UISheetDetent) _mediumDetent], [%c(_UISheetDetent) _largeDetent]];
         // Start fullscreen, 0 for half height
         self._indexOfCurrentDetent = 1;
         // Don't expand unless dragged up
