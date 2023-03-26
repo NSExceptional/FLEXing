@@ -1,5 +1,5 @@
-export ARCHS = arm64 armv7 armv7s arm64e
-export TARGET = iphone:latest:9.0
+export ARCHS = arm64 arm64e
+export TARGET = iphone:latest:14.0
 INSTALL_TARGET_PROCESSES = SpringBoard
 include $(THEOS)/makefiles/common.mk
 
@@ -18,6 +18,6 @@ print-%  : ; @echo $* = $($*)
 
 # The SUBPROJECTS feature bundles both projects into
 # one package. We want two separate packages.
-#
-# SUBPROJECTS += libflex
-# include $(THEOS_MAKE_PATH)/aggregate.mk
+
+SUBPROJECTS += libflex
+include $(THEOS_MAKE_PATH)/aggregate.mk

@@ -38,8 +38,8 @@ inline BOOL flexAlreadyLoaded() {
 } 
 
 %ctor {
-    NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
-    NSString *reflexPath =   @"/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib";
+    NSString *standardPath = @"/var/jb/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
+    NSString *reflexPath =   @"/var/jb/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib";
     NSFileManager *disk = NSFileManager.defaultManager;
     NSString *libflex = nil;
     NSString *libreflex = nil;
