@@ -1,5 +1,6 @@
+export THEOS_PACKAGE_SCHEME = rootless
 export ARCHS = arm64 arm64e
-export TARGET = iphone:latest:14.0
+export TARGET = iphone:clang:latest:14.0
 include $(THEOS)/makefiles/common.mk
 
 # FULL PATH of the FLEX repo on your own machine

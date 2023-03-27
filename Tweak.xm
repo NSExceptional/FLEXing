@@ -25,7 +25,7 @@ inline bool isLikelyUIProcess() {
 
     return [executablePath hasPrefix:@"/var/containers/Bundle/Application"] ||
         [executablePath hasPrefix:@"/Applications"] ||
-        [executablePath hasPrefix:@"/var/jb/Applications"] ||
+        [executablePath containsString:@"/procursus/Applications"] ||
         [executablePath hasSuffix:@"CoreServices/SpringBoard.app/SpringBoard"];
 }
 
