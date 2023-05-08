@@ -8,6 +8,7 @@
 
 
 #import "Interfaces.h"
+#import <rootless.h>
 
 BOOL initialized = NO;
 id manager = nil;
@@ -25,6 +26,7 @@ inline bool isLikelyUIProcess() {
 
     return [executablePath hasPrefix:@"/var/containers/Bundle/Application"] ||
         [executablePath hasPrefix:@"/Applications"] ||
+        [executablePath containsString:@"/procursus/Applications"] ||
         [executablePath hasSuffix:@"CoreServices/SpringBoard.app/SpringBoard"];
 }
 
@@ -38,8 +40,8 @@ inline BOOL flexAlreadyLoaded() {
 } 
 
 %ctor {
-    NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
-    NSString *reflexPath =   @"/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib";
+    NSString *standardPath = ROOT_PATH_NS(@"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib");
+    NSString *reflexPath =   ROOT_PATH_NS(@"/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib");
     NSFileManager *disk = NSFileManager.defaultManager;
     NSString *libflex = nil;
     NSString *libreflex = nil;
@@ -149,7 +151,10 @@ inline BOOL flexAlreadyLoaded() {
     self = %orig;
     if ([present isKindOfClass:%c(FLEXNavigationController)]) {
         // Enable half height sheet
-        self._presentsAtStandardHalfHeight = YES;
+        if ([self respondsToSelector:@selector(_presentsAtStandardHalfHeight)])
+            self._presentsAtStandardHalfHeight = YES;
+        else
+            self._detents = @[[%c(_UISheetDetent) _mediumDetent], [%c(_UISheetDetent) _largeDetent]];
         // Start fullscreen, 0 for half height
         self._indexOfCurrentDetent = 1;
         // Don't expand unless dragged up

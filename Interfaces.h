@@ -68,6 +68,11 @@ extern SEL show;
 - (void)_statusBarTapped:(id)sender type:(NSInteger)type;
 @end
 
+@interface _UISheetDetent : NSObject
++ (instancetype)_mediumDetent;
++ (instancetype)_largeDetent;
+@end
+
 @interface _UISheetPresentationController : UIPresentationController
 @property (setter=_setDetents:) NSArray *_detents;
 @property (setter=_setWantsFullScreen:) BOOL _wantsFullScreen;
