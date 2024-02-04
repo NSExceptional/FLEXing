@@ -1,6 +1,6 @@
 # FLEXing
 
-FLEXing is a basic tweak to activate the FLEX explorer via Activator or long pressing on the status bar (depending on your iOS version you will want to use the appropriate version from the releases tab).
+FLEXing is a basic tweak to activate the FLEX explorer via Activator, long pressing on the status bar, or holding the screen with 3 fingers (depending on your iOS version you will want to use the appropriate version from the releases tab).
 
 ### Isn't this the same thing as FLEXible?
 
