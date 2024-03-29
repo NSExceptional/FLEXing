@@ -6,4 +6,4 @@
 [submodule "libreflex/Reflex"]
 	path = libreflex/Reflex
 	url = https://github.com/FLEXTool/Reflex
-	branch = libreflex
+	branch = master
