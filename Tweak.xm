@@ -143,14 +143,6 @@ inline BOOL flexAlreadyLoaded() {
 - (BOOL)_canShowWhileLocked {
     return YES;
 }
-
-- (UIWindow *)statusWindow {
-    @try {
-        return [UIApplication.sharedApplication valueForKey:@"_embeddedScreenStatusBarWindow"];
-    } @catch (NSException *e) {
-        return [UIApplication.sharedApplication valueForKey:@"_statusBarWindow"];
-    }
-}
 %end
 
 %hook _UISheetPresentationController
