@@ -8,6 +8,7 @@
 
 
 #import "Interfaces.h"
+#import <rootless.h>
 
 BOOL initialized = NO;
 id manager = nil;
@@ -39,8 +40,8 @@ inline BOOL flexAlreadyLoaded() {
 } 
 
 %ctor {
-    NSString *standardPath = @"/var/jb/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
-    NSString *reflexPath =   @"/var/jb/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib";
+    NSString *standardPath = ROOT_PATH_NS(@"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib");
+    NSString *reflexPath =   ROOT_PATH_NS(@"/Library/MobileSubstrate/DynamicLibraries/libreflex.dylib");
     NSFileManager *disk = NSFileManager.defaultManager;
     NSString *libflex = nil;
     NSString *libreflex = nil;
@@ -150,10 +151,11 @@ inline BOOL flexAlreadyLoaded() {
     self = %orig;
     if ([present isKindOfClass:%c(FLEXNavigationController)]) {
         // Enable half height sheet
-        if ([self respondsToSelector:@selector(_presentsAtStandardHalfHeight)])
+        if ([self respondsToSelector:@selector(_presentsAtStandardHalfHeight)]) {
             self._presentsAtStandardHalfHeight = YES;
-        else
+        } else {
             self._detents = @[[%c(_UISheetDetent) _mediumDetent], [%c(_UISheetDetent) _largeDetent]];
+        }
         // Start fullscreen, 0 for half height
         self._indexOfCurrentDetent = 1;
         // Don't expand unless dragged up
